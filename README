@@ -1,0 +1,22 @@
+Automated manga downloader
+==========================
+
+Rewrite in progress...
+
+
+# Setup
+
+
+* Get python 3 and pip
+* `pip install -r requirements`
+* Fill your MyAnimeList credentials in settings.py
+* Create a `tracked` file with the mangas you want to track
+    * One per line
+    * Supported names given by `mangadown.py -l`
+
+
+# TODO
+
+* Other backend (lel)
+* Backend choice
+* Cleaning and kindle conversion
