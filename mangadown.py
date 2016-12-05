@@ -1,10 +1,13 @@
 #! /usr/bin/env python3
 
 import mangapedia
+import lirescan
 import mal
+import kindle
 import argparse
 import sys
 import os
+import shutil
 import asyncio
 from settings import *
 
@@ -16,10 +19,11 @@ parser.add_argument('-m', "--list-mal", dest="list_mal", action="store_true",
                     help="List MyAnimeList mangas for user")
 args = parser.parse_args()
 
-
-mangas = mangapedia.get_mangas()
+backends = (lirescan ,mangapedia)
+mangas = {b.__name__: b.get_mangas() for b in backends}
 
 if args.list_mangas:
+    mangas = set(m for backend in mangas.values() for m in backend)
     for name in sorted(mangas):
         print(name)
     sys.exit(0)
@@ -45,15 +49,26 @@ with open("tracked") as f:
 for manga in tracked:
     print("# Updating " + manga, end='')
     sys.stdout.flush()
-    code = mangas[manga]
-    chapters = mangapedia.get_chapters(code)
+    chapters = {}
+    for b in backends:
+        if manga in mangas[b.__name__]:
+            code = mangas[b.__name__][manga]
+            for chap, url in b.get_chapters(code).items():
+                chapters[chap] = (b, url)
     current = progress[mal.get_mal_title(manga)]
-    last = max(chapters)
+    last = str(max(chapters)).rstrip('0').rstrip('.')
     print(" ({}/{})".format(current, last))
-    for chap in range(current + 1, last + 1):
-        folder = "{} {}".format(manga, chap)
-        path = os.path.join("output", folder)
-        print("{}, ".format(chap), end='')
-        sys.stdout.flush()
-        mangapedia.download_chapter(chapters[chap], path, loop)
+    for chap in sorted(chapters):
+        if chap > current:
+            chap_str = str(chap).rstrip('0').rstrip('.')
+            folder = "{} {}".format(manga, chap_str)
+            path = os.path.join("output", folder)
+            if os.path.isfile(path + ".mobi"):
+                continue
+            print("{}, ".format(chap_str), end='')
+            sys.stdout.flush()
+            backend, url = chapters[chap]
+            backend.download_chapter(url, path, loop)
+            kindle.dir_to_mobi(path)
+            shutil.rmtree(path)
     print("done.")

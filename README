@@ -2,6 +2,7 @@ Automated manga downloader
 ==========================
 
 Rewrite in progress...
+Mostly working now.
 
 
 # Setup
@@ -17,6 +18,10 @@ Rewrite in progress...
 
 # TODO
 
-* Other backend (lel)
-* Backend choice
+
+* Ad removal (simple MD5 check?)
 * Cleaning and kindle conversion
+  * Splitting : both?
+  * Set author from MAL
+* Send to kindle as email
+* Service to watch new releases

@@ -4,16 +4,11 @@ import os
 import io
 from bs4 import BeautifulSoup
 import zipfile
-import json
 import utils
 
-def get_mangas(update_cache=False):
-    if not update_cache and os.path.isfile("mangas.json"):
-        mangas = {}
-        with open("mangas.json") as f:
-            mangas = json.load(f)
-        return mangas
-    print("Fetching manga list...")
+@utils.json_cached("mangapedia.json")
+def get_mangas():
+    print("Fetching manga list from mangapedia")
     url = "http://mangapedia.fr/project_code/script/moreMangas.php"
     params = {"pageNumber": 1}
     mangas = {}
@@ -24,15 +19,12 @@ def get_mangas(update_cache=False):
         count = 0
         for a in soup.find_all('a'):
             code = a["href"].split('/')[-1]
-            name = a.find("div").string
+            name = a.find("div").string.lower()
             mangas[name] = code
             count += 1
         if count == 0:
             break
         params["pageNumber"] += 1
-    print(mangas)
-    with open("mangas.json", "w") as f:
-        json.dump(mangas, f)
     return mangas
 
 def get_chapters(manga):
@@ -43,7 +35,8 @@ def get_chapters(manga):
     for a in soup.find_all('a'):
         if a["href"].startswith("http://mangapedia.fr/lel/"):
             link = a["href"]
-            n = int(link.split('/')[-2])
+            # Some chapters have dots...
+            n = float(link.split('/')[-2])
             chapters[n] = link
     return chapters
 
