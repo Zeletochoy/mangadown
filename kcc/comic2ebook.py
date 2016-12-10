@@ -603,7 +603,6 @@ def getOutputFilename(srcpath, wantedname, ext, tomeNumber):
 
 def getComicInfo(path, originalPath):
     xmlPath = os.path.join(path, 'ComicInfo.xml')
-    options.authors = ['KCC']
     options.remoteCovers = {}
     options.chapters = []
     options.summary = ''
@@ -879,6 +878,8 @@ def makeParser():
                              help="Output generated file to specified directory or file")
     outputOptions.add_option("-t", "--title", action="store", dest="title", default="defaulttitle",
                              help="Comic title [Default=filename or directory name]")
+    outputOptions.add_option("-a", "--authors", action="store", nargs='+', dest="authors", default=[],
+                             help="Comic authors [Default=KCC")
     outputOptions.add_option("-f", "--format", action="store", dest="format", default="Auto",
                              help="Output format (Available options: Auto, MOBI, EPUB, CBZ) [Default=Auto]")
     outputOptions.add_option("-b", "--batchsplit", type="int", dest="batchsplit", default="0",
