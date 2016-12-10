@@ -263,10 +263,7 @@ def buildNAV(dstdir, title, chapters, chapterNames):
 def buildOPF(dstdir, title, filelist, cover=None):
     opffile = os.path.join(dstdir, 'OEBPS', 'content.opf')
     deviceres = options.profileData[1]
-    if options.righttoleft:
-        writingmode = "horizontal-rl"
-    else:
-        writingmode = "horizontal-lr"
+    writingmode = "horizontal-lr"
     f = open(opffile, "w", encoding='UTF-8')
     f.writelines(["<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
                   "<package version=\"3.0\" unique-identifier=\"BookID\" ",
@@ -324,10 +321,7 @@ def buildOPF(dstdir, title, filelist, cover=None):
         f.write("<item id=\"img_" + str(uniqueid) + "\" href=\"" + folder + "/" + path[1] + "\" media-type=\"" +
                 mt + "\"/>\n")
     f.write("<item id=\"css\" href=\"Text/style.css\" media-type=\"text/css\"/>\n")
-    if options.righttoleft:
-        f.write("</manifest>\n<spine page-progression-direction=\"rtl\" toc=\"ncx\">\n")
-    else:
-        f.write("</manifest>\n<spine page-progression-direction=\"ltr\" toc=\"ncx\">\n")
+    f.write("</manifest>\n<spine page-progression-direction=\"ltr\" toc=\"ncx\">\n")
     for entry in reflist:
         f.write("<itemref idref=\"page_" + entry + "\"/>\n")
     f.write("</spine>\n</package>\n")
