@@ -925,7 +925,7 @@ def makeParser():
 
 def checkOptions():
     global options
-    options.panelview = True
+    options.panelview = False
     options.iskindle = False
     options.bordersColor = None
     if options.format == 'Auto':
