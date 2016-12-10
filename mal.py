@@ -33,12 +33,13 @@ def get_mal_title(search):
     choices = xml.findall("entry/title")
     if len(choices) == 0:
         return None
-    choices = [t.text for t in choices][:10]
+    choices = [t.text for t in choices]
     title = ""
-    if search.lower() == choices[0].lower():
-        title = choices[0]
-    else:
-        title = utils.user_choice("Choose title for " + search, choices)
+    for choice in choices:
+        if search.lower() == choice.lower():
+            title = choice
+    if title == "":
+        title = utils.user_choice("Choose title for " + search, choices[:10])
     cache[search] = title
     with open("mal.json", 'w') as f:
         json.dump(cache, f)
