@@ -44,7 +44,10 @@ os.makedirs("output", exist_ok=True)
 
 tracked = []
 with open("tracked") as f:
-    tracked = list(filter(bool, f.read().split('\n')))
+    for line in f.read().split('\n'):
+        line = line.strip()
+        if line != '' and not line.startswith('#'):
+            tracked.append(line)
 
 for manga in tracked:
     print("# Updating " + manga, end='')
