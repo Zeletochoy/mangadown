@@ -2,6 +2,7 @@
 
 import mangapedia
 import lirescan
+import japscan
 import mal
 import kindle
 import argparse
@@ -19,7 +20,7 @@ parser.add_argument('-m', "--list-mal", dest="list_mal", action="store_true",
                     help="List MyAnimeList mangas for user")
 args = parser.parse_args()
 
-backends = (lirescan ,mangapedia)
+backends = (lirescan, mangapedia, japscan)
 mangas = {b.__name__: b.get_mangas() for b in backends}
 
 if args.list_mangas:

@@ -19,8 +19,8 @@ async def _download_all(session, urls, path, loop, headers):
 # urls: {filename: url}
 # path: destination directory (already created)
 # loop: asyncio loop
-def download_urls(urls, path, loop, headers={}):
-    with aiohttp.ClientSession(loop=loop) as session:
+def download_urls(urls, path, loop, headers={}, cookies={}):
+    with aiohttp.ClientSession(loop=loop, cookies=cookies) as session:
         loop.run_until_complete(
                 _download_all(session, urls, path, loop, headers))
 
@@ -36,9 +36,9 @@ async def _fetch_all(session, urls, res, loop, headers):
 # urls: [url]
 # loop: asyncio loop
 # return: {url: page}
-def fetch_urls(urls, loop, headers={}):
+def fetch_urls(urls, loop, headers={}, cookies={}):
     res = {}
-    with aiohttp.ClientSession(loop=loop) as session:
+    with aiohttp.ClientSession(loop=loop, cookies=cookies) as session:
         loop.run_until_complete(
                 _fetch_all(session, urls, res, loop, headers))
     return res
