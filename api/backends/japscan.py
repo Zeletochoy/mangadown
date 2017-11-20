@@ -58,14 +58,3 @@ def download_chapter(url, path, loop):
         urls[fname] = link
     utils.download_urls(urls, path, loop, headers=requests.headers,
                         cookies=requests.cookies)
-
-if __name__ == "__main__":
-    print("Fetching manga list...")
-    mangas = get_mangas()
-    url = mangas["berserk"]
-    print("Fetching chapters for Berserk...")
-    chapters = get_chapters(url)
-    import asyncio
-    loop = asyncio.get_event_loop()
-    print("Downloading Tome 1 fo Berserk...")
-    download_chapter(chapters[1.0], "berserk 1", loop)
