@@ -1,6 +1,6 @@
+from .. import utils
 import requests
 from bs4 import BeautifulSoup
-import utils
 import os
 
 @utils.json_cached("lirescan.json")

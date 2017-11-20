@@ -1,10 +1,10 @@
-import cfscrape
+from .. import utils
 import re
 import os
 import io
-from bs4 import BeautifulSoup
 import zipfile
-import utils
+import cfscrape
+from bs4 import BeautifulSoup
 
 requests = cfscrape.create_scraper()
 

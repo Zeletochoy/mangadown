@@ -1,9 +1,9 @@
+from .. import utils
 import os
 import io
-from bs4 import BeautifulSoup
 import zipfile
 import requests
-import utils
+from bs4 import BeautifulSoup
 
 @utils.json_cached("scantradfr.json")
 def get_mangas():

@@ -1,16 +1,14 @@
 #! /usr/bin/env python3
 
-from backends import backends
-import mal
-import kindle
-import gmail
+from api import mal, kindle, gmail
+from api.backends import backends
+from api.settings import *
 import argparse
 import sys
 import os
 import shutil
 import asyncio
 from collections import defaultdict
-from settings import *
 
 
 parser = argparse.ArgumentParser(description="Manga downloader")

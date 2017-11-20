@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
+from .. import utils
 import cfscrape
 from bs4 import BeautifulSoup
-import utils
 import os
 import re
 

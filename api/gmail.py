@@ -1,10 +1,10 @@
+from . import settings
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email import encoders
 import smtplib
 import os.path
 import threading
-import settings
 
 
 def send_mail(to, subject, files=[]):

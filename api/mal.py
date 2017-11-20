@@ -1,12 +1,12 @@
+from . import utils
+from .settings import *
+import json
+import os
+from collections import OrderedDict, defaultdict
 import requests
 import xml.etree.ElementTree as XML
 from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
-import json
-import os
-import utils
-from collections import OrderedDict, defaultdict
-from settings import *
 
 def get_manga_progress(user):
     url = "https://myanimelist.net/malappinfo.php?status=all&type=manga&u="
@@ -22,8 +22,10 @@ def get_manga_progress(user):
 
 def get_mal_title(search):
     cache = {}
-    if os.path.isfile("mal.json"):
-        with open("mal.json") as f:
+    module_path = os.path.join(os.path.dirname(__file__), "..")
+    cache_path = os.path.join(module_path, "cache", "mal.json")
+    if os.path.isfile(cache_path):
+        with open(cache_path) as f:
             cache = json.load(f)
         if search in cache:
             return cache[search]
@@ -45,6 +47,6 @@ def get_mal_title(search):
     if title == "":
         title = utils.user_choice("Choose title for " + search, choices[:10])
     cache[search] = title
-    with open("mal.json", 'w') as f:
+    with open(cache_path, 'w') as f:
         json.dump(cache, f)
     return title

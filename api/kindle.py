@@ -1,6 +1,4 @@
-#! /usr/bin/env python3
-
-from kcc import comic2ebook
+from .kcc import comic2ebook
 import sys
 import os
 
@@ -22,11 +20,3 @@ def dir_to_mobi(path, title=None, authors=None):
             sys.stdout = stdout
             raise
     sys.stdout = stdout
-
-
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("usage: {} chapter_dir".format(sys.argv[0]))
-        sys.exit(1)
-
-    dir_to_mobi(sys.argv[1])
