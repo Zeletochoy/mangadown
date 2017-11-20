@@ -13,7 +13,7 @@ def get_mangas():
     print("Fetching manga list from japscan.com")
     url = "http://www.japscan.com/mangas/"
     page = requests.get(url)
-    soup = BeautifulSoup(page.text)
+    soup = BeautifulSoup(page.text, "html.parser")
     tab = soup.find(id="liste_mangas")
     mangas = {}
     for manga in tab.find_all('a'):
@@ -26,7 +26,7 @@ def get_mangas():
 def get_chapters(url):
     url = "http://www.japscan.com" + url
     page = requests.get(url)
-    soup = BeautifulSoup(page.text)
+    soup = BeautifulSoup(page.text, "html.parser")
     tab = soup.find(id="liste_chapitres")
     chapters = {}
     for chap in tab.find_all("a"):
@@ -40,7 +40,7 @@ def get_chapters(url):
 def download_chapter(url, path, loop):
     os.makedirs(path, exist_ok=True)
     page = requests.get(url)
-    soup = BeautifulSoup(page.text)
+    soup = BeautifulSoup(page.text, "html.parser")
     nav = soup.find(id="pages")
     urls = []
     for elem in nav.find_all("option"):
@@ -50,9 +50,11 @@ def download_chapter(url, path, loop):
                              cookies=requests.cookies)
     urls = {}
     for page in pages.values():
-        soup = BeautifulSoup(page)
+        soup = BeautifulSoup(page, "html.parser")
         link = soup.find(id="image")["src"]
         fname = link.split('/')[-1]
+        if "__add" in fname.lower():
+            continue # Crappy ad blocker
         urls[fname] = link
     utils.download_urls(urls, path, loop, headers=requests.headers,
                         cookies=requests.cookies)

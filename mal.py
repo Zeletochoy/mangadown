@@ -1,9 +1,11 @@
 import requests
 import xml.etree.ElementTree as XML
+from bs4 import BeautifulSoup
 from urllib.parse import quote_plus
 import json
 import os
 import utils
+from collections import OrderedDict, defaultdict
 from settings import *
 
 def get_manga_progress(user):
@@ -11,7 +13,7 @@ def get_manga_progress(user):
     url += user
     page = requests.get(url)
     xml = XML.fromstring(page.text)
-    progress = {}
+    progress = defaultdict(lambda: 0)
     for m in xml.findall("manga"):
         title = m.find("series_title").text
         count = int(m.find("my_read_chapters").text)
@@ -25,15 +27,17 @@ def get_mal_title(search):
             cache = json.load(f)
         if search in cache:
             return cache[search]
-    url = "https://myanimelist.net/api/manga/search.xml?q="
-    url += quote_plus(search)
-    creds = (MAL_USER, MAL_PASS)
-    page = requests.get(url, auth=creds)
-    xml = XML.fromstring(page.text)
-    choices = xml.findall("entry/title")
+    url = "https://myanimelist.net/manga.php?q="
+    url += search
+    page = requests.get(url)
+    page = BeautifulSoup(page.text, "html.parser")
+    choices = []
+    for link in page.find_all('a', class_="hoverinfo_trigger fw-b"):
+        name = link.text
+        if not name in choices:
+            choices.append(name)
     if len(choices) == 0:
         return None
-    choices = [t.text for t in choices]
     title = ""
     for choice in choices:
         if search.lower() == choice.lower():

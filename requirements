@@ -1,5 +1,16 @@
+# Mangadown
 requests
 aiohttp
 aiodns
 beautifulsoup4
 cfscrape
+
+# KCC
+python-slugify
+Pillow
+psutil
+
+# Website
+django==1.11
+django-mathfilters
+django-debug-toolbar

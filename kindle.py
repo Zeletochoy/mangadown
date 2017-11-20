@@ -12,11 +12,15 @@ def dir_to_mobi(path, title=None, authors=None):
     if authors is not None:
         argv += ["-a"] + authors
     argv.append(path)
-    
+
     stdout = sys.stdout
     with open(os.devnull, 'w') as devnull:
         sys.stdout = devnull
-        comic2ebook.main(argv)
+        try:
+            comic2ebook.main(argv)
+        except:
+            sys.stdout = stdout
+            raise
     sys.stdout = stdout
 
 
@@ -24,5 +28,5 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("usage: {} chapter_dir".format(sys.argv[0]))
         sys.exit(1)
-    
+
     dir_to_mobi(sys.argv[1])

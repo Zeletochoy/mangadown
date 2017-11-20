@@ -1,15 +1,15 @@
 #! /usr/bin/env python3
 
-import mangapedia
-import lirescan
-import japscan
+from backends import backends
 import mal
 import kindle
+import gmail
 import argparse
 import sys
 import os
 import shutil
 import asyncio
+from collections import defaultdict
 from settings import *
 
 
@@ -18,9 +18,10 @@ parser.add_argument('-l', "--list-mangas", action="store_true",
                     dest="list_mangas", help="List available mangas")
 parser.add_argument('-m', "--list-mal", dest="list_mal", action="store_true",
                     help="List MyAnimeList mangas for user")
+parser.add_argument('-a', "--mangas", type=str, nargs='+', default=[],
+                    help="Mangas to download, added to the tracked file")
 args = parser.parse_args()
 
-backends = (lirescan, mangapedia, japscan)
 mangas = {b.__name__: b.get_mangas() for b in backends}
 
 if args.list_mangas:
@@ -43,7 +44,7 @@ if not os.path.isfile("tracked"):
 loop = asyncio.get_event_loop()
 os.makedirs("output", exist_ok=True)
 
-tracked = []
+tracked = args.mangas
 with open("tracked") as f:
     for line in f.read().split('\n'):
         line = line.strip()
@@ -51,14 +52,13 @@ with open("tracked") as f:
             tracked.append(line)
 
 for manga in tracked:
-    print("# Updating " + manga, end='')
-    sys.stdout.flush()
-    chapters = {}
+    print("# Updating " + manga, end='', flush=True)
+    chapters = defaultdict(list)
     for b in backends:
         if manga in mangas[b.__name__]:
             code = mangas[b.__name__][manga]
             for chap, url in b.get_chapters(code).items():
-                chapters[chap] = (b, url)
+                chapters[chap].append((b, url))
     current = progress[mal.get_mal_title(manga)]
     last = str(max(chapters)).rstrip('0').rstrip('.')
     print(" ({}/{})".format(current, last))
@@ -69,10 +69,26 @@ for manga in tracked:
             path = os.path.join("output", folder)
             if os.path.isfile(path + ".mobi"):
                 continue
-            print("{}, ".format(chap_str), end='')
-            sys.stdout.flush()
-            backend, url = chapters[chap]
-            backend.download_chapter(url, path, loop)
-            kindle.dir_to_mobi(path)
-            shutil.rmtree(path)
+            print("{}, ".format(chap_str), end='', flush=True)
+            success = False
+            for backend, url in chapters[chap]:
+                try:
+                    backend.download_chapter(url, path, loop)
+                    kindle.dir_to_mobi(path)
+                    shutil.rmtree(path)
+                    success = True
+                    break
+                except KeyboardInterrupt:
+                    raise
+                except:
+                    print("({} X), ".format(backend.__name__), end='', flush=True)
+                    try:
+                        os.remove(path + ".mobi")
+                        shutil.rmtree(path)
+                    except:
+                        pass
+            if not success:
+                print("FAIL")
+            else:
+                gmail.send_mail(KINDLE_MAIL, folder, [path + ".mobi"])
     print("done.")

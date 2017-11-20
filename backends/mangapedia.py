@@ -1,10 +1,12 @@
-import requests
+import cfscrape
 import re
 import os
 import io
 from bs4 import BeautifulSoup
 import zipfile
 import utils
+
+requests = cfscrape.create_scraper()
 
 @utils.json_cached("mangapedia.json")
 def get_mangas():
@@ -15,13 +17,16 @@ def get_mangas():
     while True:
         print("Fetching page {}...".format(params["pageNumber"]))
         page = requests.post(url, data=params)
-        soup = BeautifulSoup(page.text)
+        soup = BeautifulSoup(page.text, "html.parser")
         count = 0
         for a in soup.find_all('a'):
-            code = a["href"].split('/')[-1]
-            name = a.find("div").string.lower()
-            mangas[name] = code
-            count += 1
+            try:
+                code = a["href"].split('/')[-1]
+                name = a.find("div").string.lower()
+                mangas[name] = code
+                count += 1
+            except:
+                continue
         if count == 0:
             break
         params["pageNumber"] += 1
@@ -30,14 +35,19 @@ def get_mangas():
 def get_chapters(manga):
     url = "http://mangapedia.fr/manga/" + manga
     page = requests.get(url)
-    soup = BeautifulSoup(page.text)
+    soup = BeautifulSoup(page.text, "html.parser")
     chapters = {}
     for a in soup.find_all('a'):
         if a["href"].startswith("http://mangapedia.fr/lel/"):
             link = a["href"]
             # Some chapters have dots...
-            n = float(link.split('/')[-2])
-            chapters[n] = link
+            try:
+                chap_nb = link.split('/')[-2]
+                n = float(chap_nb)
+                chapters[n] = link
+            except:
+                print("Unable to parse chapter number: {}".format(chap_nb))
+                continue
     return chapters
 
 def download_chapter_pages(page, path, loop):
@@ -47,12 +57,15 @@ def download_chapter_pages(page, path, loop):
     urls = {}
     for l in links:
         match = re.search("&FileName=(.*)&", l)
-        urls[match.group(1)] = l
+        fname = match.group(1)
+        if "__add" in fname.lower():
+            continue # Crappy ad blocker
+        urls[fname] = l
     headers = {"Referer": page.url}
     utils.download_urls(urls, path, loop, headers)
 
 def download_chapter_zip(page, path):
-    soup = BeautifulSoup(page.text)
+    soup = BeautifulSoup(page.text, "html.parser")
     clictune = soup.find(id="downloadChapterConfirm")
     if clictune is None:
         return False
