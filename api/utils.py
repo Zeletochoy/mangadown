@@ -1,7 +1,9 @@
 import aiohttp
 import asyncio
 import os
+import socket
 import json
+
 
 async def _download(session, url, path, headers):
     async with session.get(url, headers=headers) as response:
@@ -20,7 +22,8 @@ async def _download_all(session, urls, path, loop, headers):
 # path: destination directory (already created)
 # loop: asyncio loop
 def download_urls(urls, path, loop, headers={}, cookies={}):
-    with aiohttp.ClientSession(loop=loop, cookies=cookies) as session:
+    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
+    with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
         loop.run_until_complete(
                 _download_all(session, urls, path, loop, headers))
 
@@ -38,7 +41,8 @@ async def _fetch_all(session, urls, res, loop, headers):
 # return: {url: page}
 def fetch_urls(urls, loop, headers={}, cookies={}):
     res = {}
-    with aiohttp.ClientSession(loop=loop, cookies=cookies) as session:
+    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
+    with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
         loop.run_until_complete(
                 _fetch_all(session, urls, res, loop, headers))
     return res
