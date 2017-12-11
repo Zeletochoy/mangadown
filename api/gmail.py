@@ -29,7 +29,6 @@ def send_mail(to, subject, files=[]):
     server.login(settings.GMAIL_USER, settings.GMAIL_PASS)
     server.sendmail(settings.GMAIL_USER, to, msg.as_string())
     server.quit()
-    print("mail sent")
 
 
 # Same parameters as send_mail
