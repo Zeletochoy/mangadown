@@ -67,7 +67,7 @@ class Backends:
             try:
                 backend.download_chapter(url, path, loop)
             except Exception as e:
-                logging.warning("{}.download_chapter({}, {}) failed: {}".format(name, title, num, e))
+                logging.warning("{}.download_chapter({}, {}) failed: {}".format(back_name, title, num, e))
                 if os.path.isdir(path):
                     shutil.rmtree(path)
                 continue
