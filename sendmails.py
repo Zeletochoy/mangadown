@@ -3,8 +3,13 @@
 from api import gmail
 from api import settings
 import os
+import sys
 
-for fname in os.listdir("output"):
+files = sys.argv[1:]
+if len(files) == 0:
+    files = [os.path.join("output", f) for f in os.listdir("output")]
+
+
+for fname in files:
     print("Sending {}...".format(fname))
-    gmail.send_mail(settings.KINDLE_MAIL, fname,
-                    [os.path.join("output", fname)])
+    gmail.send_mail(settings.KINDLE_MAIL, fname, [fname])
