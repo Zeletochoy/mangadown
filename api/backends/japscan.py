@@ -24,13 +24,14 @@ def get_mangas():
     return mangas
 
 def get_chapters(url):
-    url = "http://www.japscan.com" + url
+    base_url = "http://www.japscan.com"
+    url = base_url + url
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     tab = soup.find(id="liste_chapitres")
     chapters = {}
     for chap in tab.find_all("a"):
-        url = "http:" + chap["href"]
+        url = base_url + chap["href"]
         if "lecture-en-ligne" in url:
             match = re.search("(\d+)(?!.*\d)", url)
             num = float(match.group(1))
