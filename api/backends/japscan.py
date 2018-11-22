@@ -31,7 +31,9 @@ def get_chapters(url):
     tab = soup.find(id="liste_chapitres")
     chapters = {}
     for chap in tab.find_all("a"):
-        url = base_url + chap["href"]
+        url = chap["href"]
+        if url.startswith("/"):
+            url = base_url + url
         if "lecture-en-ligne" in url:
             match = re.search("(\d+)(?!.*\d)", url)
             num = float(match.group(1))
@@ -39,13 +41,15 @@ def get_chapters(url):
     return chapters
 
 def download_chapter(url, path, loop):
-    os.makedirs(path, exist_ok=True)
+    base_url = "http://www.japscan.com"
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     nav = soup.find(id="pages")
     urls = []
     for elem in nav.find_all("option"):
-        url = "http://www.japscan.com" + elem["value"]
+        url = elem["value"]
+        if url.startswith("/"):
+            url = base_url + url
         urls.append(url)
     pages = utils.fetch_urls(urls, loop, headers=requests.headers,
                              cookies=requests.cookies)
@@ -57,5 +61,6 @@ def download_chapter(url, path, loop):
         if "__add" in fname.lower():
             continue # Crappy ad blocker
         urls[fname] = link
+    os.makedirs(path, exist_ok=True)
     utils.download_urls(urls, path, loop, headers=requests.headers,
                         cookies=requests.cookies)
