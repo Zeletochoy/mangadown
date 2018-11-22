@@ -1,4 +1,3 @@
-from . import mangapedia
 from . import lirescan
 from . import japscan
 from . import scantradfr
@@ -9,7 +8,7 @@ import shutil
 from collections import defaultdict
 
 
-backends = (scantradfr, lirescan, japscan, mangapedia)
+backends = (scantradfr, lirescan, japscan)
 name2mod = {b.__name__: b for b in backends}
 
 
