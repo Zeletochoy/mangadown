@@ -1,6 +1,7 @@
 from .kcc import comic2ebook
 import sys
 import os
+from contextlib import contextmanager
 
 
 def dir_to_mobi(path, title=None, authors=None):
@@ -11,12 +12,19 @@ def dir_to_mobi(path, title=None, authors=None):
         argv += ["-a"] + authors
     argv.append(path)
 
+    with ignore_output():
+        comic2ebook.main(argv)
+
+
+@contextmanager
+def ignore_output(ignore_stdout=True, ignore_stderr=False):
     stdout = sys.stdout
+    stderr = sys.stderr
     with open(os.devnull, 'w') as devnull:
-        sys.stdout = devnull
-        try:
-            comic2ebook.main(argv)
-        except:
-            sys.stdout = stdout
-            raise
+        if ignore_stdout:
+            sys.stdout = devnull
+        if ignore_stderr:
+            sys.stderr = devnull
+        yield
     sys.stdout = stdout
+    sys.stderr = stderr
