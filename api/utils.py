@@ -10,41 +10,38 @@ async def _download(session, url, path, headers):
         with open(path, "wb") as f:
             f.write(await response.read())
 
-async def _download_all(session, urls, path, loop, headers):
-    tasks = []
-    for fname, url in urls.items():
-        fullpath = os.path.join(path, fname)
-        task = loop.create_task(_download(session, url, fullpath, headers))
-        tasks.append(task)
-    await asyncio.wait(tasks)
+async def _download_all(urls, path, loop, headers, cookies):
+    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
+    async with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
+        tasks = []
+        for fname, url in urls.items():
+            fullpath = os.path.join(path, fname)
+            task = loop.create_task(_download(session, url, fullpath, headers))
+            tasks.append(task)
+        await asyncio.gather(*tasks)
 
 # urls: {filename: url}
 # path: destination directory (already created)
 # loop: asyncio loop
 def download_urls(urls, path, loop, headers={}, cookies={}):
-    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
-    with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
-        loop.run_until_complete(
-                _download_all(session, urls, path, loop, headers))
+    loop.run_until_complete(_download_all(urls, path, loop, headers, cookies))
 
 
 async def _fetch(session, url, res, headers):
     async with session.get(url, headers=headers) as response:
         res[url] = await response.text()
 
-async def _fetch_all(session, urls, res, loop, headers):
-    await asyncio.wait([loop.create_task(_fetch(session, url, res, headers))
-                        for url in urls])
+async def _fetch_all(urls, res, loop, headers, cookies):
+    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
+    async with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
+        await asyncio.gather(*[loop.create_task(_fetch(session, url, res, headers)) for url in urls])
 
 # urls: [url]
 # loop: asyncio loop
 # return: {url: page}
 def fetch_urls(urls, loop, headers={}, cookies={}):
     res = {}
-    conn = aiohttp.TCPConnector(family=socket.AF_INET, verify_ssl=False)
-    with aiohttp.ClientSession(connector=conn, loop=loop, cookies=cookies) as session:
-        loop.run_until_complete(
-                _fetch_all(session, urls, res, loop, headers))
+    loop.run_until_complete(_fetch_all(urls, res, loop, headers, cookies))
     return res
 
 

@@ -28,7 +28,7 @@ def update_manga(manga):
         print(": no available chapters.")
         return
     progress = get_progress()
-    current = progress[mal.get_mal_title(manga)]
+    current = progress.get(mal.get_mal_title(manga), 0)
     last = str(max(chapters)).rstrip('0').rstrip('.')
     print(" ({}/{})".format(current, last))
     for chap in (c for c in sorted(chapters) if c > current):

@@ -20,6 +20,7 @@ def get_manga_progress(user):
         progress[title] = count
     return progress
 
+
 def get_mal_title(search):
     cache = {}
     module_path = os.path.join(os.path.dirname(__file__), "..")

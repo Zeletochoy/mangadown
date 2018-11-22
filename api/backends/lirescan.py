@@ -6,7 +6,7 @@ import os
 @utils.json_cached("lirescan.json")
 def get_mangas():
     print("Fetching manga list from lirescan.net")
-    url = "http://www.lirescan.net/"
+    url = "http://www.lirescan.net/nanatsu-no-taizai-lecture-en-ligne/"
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     dropdown = soup.find(id="mangas")
