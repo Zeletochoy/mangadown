@@ -1,26 +1,33 @@
 #! /usr/bin/env python3
 
 from .. import utils
-import cfscrape
+import cloudscraper
 from bs4 import BeautifulSoup
+from itertools import count
 import os
 import re
 
-requests = cfscrape.create_scraper()
+requests = cloudscraper.create_scraper(allow_brotli=False)
 
 @utils.json_cached("japscan.json")
 def get_mangas():
-    print("Fetching manga list from japscan.com")
-    url = "http://www.japscan.com/mangas/"
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text, "html.parser")
-    tab = soup.find(id="liste_mangas")
+    print("Fetching manga list from japscan.com: page ", end="", flush=True)
     mangas = {}
-    for manga in tab.find_all('a'):
-        url = manga["href"]
-        if url.startswith("/mangas"):
-            title = manga.text.lower()
-            mangas[title] = url
+    for page in count(1):
+        print(f"{page}, ", end="", flush=True)
+        url = f"http://www.japscan.com/mangas/{page}"
+        page = requests.get(url)
+        soup = BeautifulSoup(page.text, "html.parser")
+        main = soup.find(id="main")
+        if main is None:
+            break
+        for title_p in main.find(class_="d-flex").find_all("p"):
+            link = title_p.find("a")
+            url = link["href"]
+            if url.startswith("/manga"):
+                title = link.text.lower()
+                mangas[title] = url
+    print("done")
     return mangas
 
 def get_chapters(url):
@@ -28,12 +35,14 @@ def get_chapters(url):
     url = base_url + url
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
-    tab = soup.find(id="liste_chapitres")
+    tab = soup.find(id="chapters_list")
     chapters = {}
     for chap in tab.find_all("a"):
         url = chap["href"]
         if url.startswith("/"):
             url = base_url + url
+        if not url.endswith("/"):
+            url += "/"
         if "lecture-en-ligne" in url:
             match = re.search("(\d+)(?!.*\d)", url)
             num = float(match.group(1))
@@ -56,7 +65,7 @@ def download_chapter(url, path, loop):
     urls = {}
     for page in pages.values():
         soup = BeautifulSoup(page, "html.parser")
-        link = soup.find(id="image")["src"]
+        link = soup.find(id="image")["data-src"]
         fname = link.split('/')[-1]
         if "__add" in fname.lower():
             continue # Crappy ad blocker

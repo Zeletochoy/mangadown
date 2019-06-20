@@ -3,7 +3,7 @@ requests
 aiohttp
 aiodns
 beautifulsoup4
-cfscrape
+cloudscraper
 
 # KCC
 python-slugify
@@ -11,6 +11,6 @@ Pillow
 psutil
 
 # Website
-django==1.11
+django==2.0
 django-mathfilters
 django-debug-toolbar

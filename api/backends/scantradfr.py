@@ -33,8 +33,6 @@ def get_chapters(manga):
 def download_chapter(url, path, loop):
     os.makedirs(path, exist_ok=True)
     res = requests.get(url)
-    soup = BeautifulSoup(res.content, "html.parser")
-    token = soup.find(id="contact-form").find("input")["value"]
-    data = requests.post(url, data={"_token": token}, cookies=res.cookies).content
+    data = res.content
     with zipfile.ZipFile(io.BytesIO(data)) as z:
         z.extractall(path)
