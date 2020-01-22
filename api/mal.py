@@ -1,24 +1,13 @@
 from . import utils
-from .settings import *
 import json
 import os
-from collections import OrderedDict, defaultdict
 import requests
-import xml.etree.ElementTree as XML
-from bs4 import BeautifulSoup
-from urllib.parse import quote_plus
+
 
 def get_manga_progress(user):
-    url = "https://myanimelist.net/malappinfo.php?status=all&type=manga&u="
-    url += user
-    page = requests.get(url)
-    xml = XML.fromstring(page.text)
-    progress = defaultdict(lambda: 0)
-    for m in xml.findall("manga"):
-        title = m.find("series_title").text
-        count = int(m.find("my_read_chapters").text)
-        progress[title] = count
-    return progress
+    url = "https://api.jikan.moe/v3/user/{}/mangalist/reading".format(user)
+    res = requests.get(url)
+    return {m["title"]: m["read_chapters"] for m in res.json()["mangas"]}
 
 
 def get_mal_title(search):
@@ -30,15 +19,9 @@ def get_mal_title(search):
             cache = json.load(f)
         if search in cache:
             return cache[search]
-    url = "https://myanimelist.net/manga.php?q="
-    url += search
-    page = requests.get(url)
-    page = BeautifulSoup(page.text, "html.parser")
-    choices = []
-    for link in page.find_all('a', class_="hoverinfo_trigger fw-b"):
-        name = link.text
-        if not name in choices:
-            choices.append(name)
+    url = "https://api.jikan.moe/v3/search/manga?q=" + search
+    res = requests.get(url)
+    choices = [m["title"] for m in res.json()["results"]]
     if len(choices) == 0:
         return None
     title = ""
