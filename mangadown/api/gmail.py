@@ -1,10 +1,10 @@
-from . import settings
+from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
-from email import encoders
 import smtplib
-import os.path
 import threading
+
+from . import settings
 
 
 def send_mail(to, subject, files=[]):
@@ -13,13 +13,12 @@ def send_mail(to, subject, files=[]):
     msg["To"] = to
     msg["Subject"] = subject
 
-    for fname in files:
+    for path in files:
         part = MIMEBase("application", "octet-stream")
-        with open(fname, "rb") as f:
+        with open(path, "rb") as f:
             part.set_payload(f.read())
         encoders.encode_base64(part)
-        part.add_header("Content-Disposition",
-                "attachment; filename=\"{}\"".format(os.path.basename(fname)))
+        part.add_header("Content-Disposition", f"attachment; filename=\"{path.name}\"")
         msg.attach(part)
 
     server = smtplib.SMTP('smtp.gmail.com:587')
