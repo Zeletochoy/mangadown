@@ -9,7 +9,7 @@ Mostly working now.
 
 
 * Get python 3 and pip
-* `pip install -r requirements`
+* `pip install .`
 * Fill your MyAnimeList credentials in settings.py
 * Create a `tracked` file with the mangas you want to track
     * One per line
@@ -24,5 +24,4 @@ Mostly working now.
 * Cleaning and kindle conversion
   * Splitting : both?
   * Set author from MAL
-* Send to kindle as email
 * Service to watch new releases
