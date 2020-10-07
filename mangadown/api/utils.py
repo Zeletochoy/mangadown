@@ -68,7 +68,9 @@ def user_choice(prompt, choices):
 
 def json_cached(path):
     module_path = os.path.join(os.path.dirname(__file__), "..")
-    path = os.path.join(module_path, "cache", path)
+    folder = os.path.join(module_path, "cache")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, path)
     def decorator(func):
         def wrapped(*args, **kwargs):
             if os.path.isfile(path):

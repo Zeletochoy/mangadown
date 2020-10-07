@@ -1,6 +1,7 @@
 from . import lirescan
 from . import japscan
 from . import scantradfr
+from . import scan_fr
 from .. import kindle
 import logging
 import os
@@ -8,7 +9,8 @@ import shutil
 from collections import defaultdict
 
 
-backends = (scantradfr, lirescan, japscan)
+# backends = (scantradfr, lirescan, scan_fr)  #japscan)
+backends = (scan_fr,)
 name2mod = {b.__name__: b for b in backends}
 
 
