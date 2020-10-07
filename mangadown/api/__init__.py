@@ -1,10 +1,12 @@
-from . import mal
-from .backends import Backends
-from .settings import *
 import os
 import asyncio
 from collections import defaultdict
 from functools import lru_cache
+
+from . import mal
+from .. import OUTPUT_DIR
+from .backends import Backends
+from .settings import *
 
 
 loop = asyncio.get_event_loop()
@@ -34,9 +36,9 @@ def update_manga(manga):
     for chap in (c for c in sorted(chapters) if c > current):
         chap_str = str(chap).rstrip('0').rstrip('.')
         folder = "{} {}".format(manga, chap_str)
-        path = os.path.join("output", folder)
-        mobi = path + ".mobi"
-        if os.path.isfile(mobi):
+        path = OUTPUT_DIR / folder
+        mobi = path.with_suffix(".mobi")
+        if mobi.is_file():
             continue
         print("{}".format(chap_str), end='')
         success = Backends.download_chapter(manga, chap, path, loop)

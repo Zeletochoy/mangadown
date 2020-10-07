@@ -15,7 +15,7 @@ def get_mangas():
     mangas = {}
     for page in count(1):
         print(f"{page}, ", end="", flush=True)
-        url = f"http://www.japscan.com/mangas/{page}"
+        url = f"http://www.japscan.se/mangas/{page}"
         page = requests.get(url)
         soup = BeautifulSoup(page.text, "html.parser")
         main = soup.find(id="main")
@@ -26,12 +26,14 @@ def get_mangas():
             url = link["href"]
             if url.startswith("/manga"):
                 title = link.text.lower()
+                if title in mangas:
+                    # wraps to page 1
+                    print("done")
+                    return mangas
                 mangas[title] = url
-    print("done")
-    return mangas
 
 def get_chapters(url):
-    base_url = "http://www.japscan.com"
+    base_url = "http://www.japscan.se"
     url = base_url + url
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
@@ -50,7 +52,7 @@ def get_chapters(url):
     return chapters
 
 def download_chapter(url, path, loop):
-    base_url = "http://www.japscan.com"
+    base_url = "http://www.japscan.se"
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     nav = soup.find(id="pages")

@@ -4,10 +4,10 @@ import os
 import requests
 
 
+
 def get_manga_progress(user):
-    url = "https://api.jikan.moe/v3/user/{}/mangalist/reading".format(user)
-    res = requests.get(url)
-    return {m["title"]: m["read_chapters"] for m in res.json()["mangas"]}
+    page = requests.get(f"https://myanimelist.net/mangalist/{user}/load.json").json()
+    return {m["manga_title"]: m["num_read_chapters"] for m in page}
 
 
 def get_mal_title(search):
