@@ -37,7 +37,7 @@ def update_manga(manga):
         chap_str = str(chap).rstrip('0').rstrip('.')
         folder = "{} {}".format(manga, chap_str)
         path = OUTPUT_DIR / folder
-        mobi = path.with_suffix(".mobi")
+        mobi = OUTPUT_DIR / f"{folder}.mobi"
         if mobi.is_file():
             continue
         print("{}".format(chap_str), end='')

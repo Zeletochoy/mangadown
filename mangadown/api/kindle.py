@@ -1,16 +1,15 @@
-from .kcc import comic2ebook
 import sys
 import os
 from contextlib import contextmanager
 
+from kindlecomicconverter import comic2ebook
 
-def dir_to_mobi(path, title=None, authors=None):
-    argv = "-m -f MOBI -p K45 -c 1".split()
+
+
+def dir_to_mobi(path, title=None):
+    argv = [str(path), "-p", "KV", "-m", "-f", "MOBI", "-u", "-o", str(path.parent)]
     if title is not None:
         argv += ["-t", title]
-    if authors is not None:
-        argv += ["-a"] + authors
-    argv.append(path)
 
     with ignore_output():
         comic2ebook.main(argv)

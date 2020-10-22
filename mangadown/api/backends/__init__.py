@@ -81,7 +81,7 @@ class Backends:
                 logging.warning("dir_to_mobi({}) failed: {}".format(path, e))
                 if os.path.isdir(path):
                     shutil.rmtree(path)
-                mobi = path + ".mobi"
+                mobi = path.parent / f"{path.name}.mobi"
                 if os.path.isfile(mobi):
-                    os.remove(path + ".mobi")
+                    os.remove(mobi)
         return success

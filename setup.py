@@ -17,6 +17,7 @@ setup(
         "certifi>=2020.6.20",
         "click>=6.7",
         "cloudscraper>=1.2.48",
+        "KindleComicConverter>=5.5.2",
         "Pillow>=7.2.0",
         "psutil>=5.7.2",
         "requests>=2.24.0",
