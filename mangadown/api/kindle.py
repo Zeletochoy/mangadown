@@ -3,8 +3,11 @@ import os
 from contextlib import contextmanager
 
 from kindlecomicconverter import comic2ebook
+from PIL import ImageFile
 
 
+# https://stackoverflow.com/questions/12984426/pil-ioerror-image-file-truncated-with-big-images
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 def dir_to_epub(path, title=None):
