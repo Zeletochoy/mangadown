@@ -73,15 +73,15 @@ class Backends:
                     shutil.rmtree(path)
                 continue
             try:
-                kindle.dir_to_mobi(path)
+                kindle.dir_to_epub(path)
                 shutil.rmtree(path)
                 success = True
                 break
             except Exception as e:
-                logging.warning("dir_to_mobi({}) failed: {}".format(path, e))
+                logging.warning("dir_to_epub({}) failed: {}".format(path, e))
                 if os.path.isdir(path):
                     shutil.rmtree(path)
-                mobi = path.parent / f"{path.name}.mobi"
-                if os.path.isfile(mobi):
-                    os.remove(mobi)
+                epub = path.parent / f"{path.name}.epub"
+                if os.path.isfile(epub):
+                    os.remove(epub)
         return success

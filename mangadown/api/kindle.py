@@ -6,8 +6,9 @@ from kindlecomicconverter import comic2ebook
 
 
 
-def dir_to_mobi(path, title=None):
-    argv = [str(path), "-p", "KV", "-m", "-f", "MOBI", "-u", "-o", str(path.parent)]
+
+def dir_to_epub(path, title=None):
+    argv = [str(path), "-p", "KV", "-m", "-f", "EPUB", "-u", "-o", str(path.parent)]
     if title is not None:
         argv += ["-t", title]
 
