@@ -17,6 +17,6 @@ def main(filepaths: List[click.Path]) -> None:
     else:
         filepaths = list(OUTPUT_DIR.iterdir())
 
-    for path in filepaths:
+    for path in sorted(filepaths):
         print(f"Sending {path.stem}...")
         gmail.send_mail(settings.KINDLE_MAIL, path.stem, [path])

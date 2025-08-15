@@ -153,8 +153,8 @@ def download_chapter(chapter_url, path, loop):
     resp = requests.get(url)
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Collect all image URLs belonging to the manga pages.
-    urls = {}
+    # Collect all image URLs belonging to the manga pages in DOM order.
+    page_img_urls = []
     for img in soup.find_all("img"):
         img_url = img.get("data-src") or img.get("src", "")
         if not img_url:
@@ -165,16 +165,26 @@ def download_chapter(chapter_url, path, loop):
         if "/storage/content/" not in img_url:
             continue
 
-        # Ignore placeholders without an actual filename.
+        # Ignore placeholders without an actual filename/extension.
         fname = img_url.rsplit("/", 1)[-1]
-        if not re.search(r"\.(webp|jpg|jpeg|png)$", fname, re.IGNORECASE):
+        m = re.search(r"\.(webp|jpg|jpeg|png)$", fname, re.IGNORECASE)
+        if not m:
             continue
 
-        urls[fname] = img_url
+        # Keep the URL; we'll rename files sequentially so ordering is preserved.
+        page_img_urls.append((img_url, m.group(0).lower()))
 
     # Nothing to download -> abort early.
-    if not urls:
+    if not page_img_urls:
         raise RuntimeError("No content images found on chapter page")
+
+    # Build a filename mapping that enforces reading order for KCC by using
+    # zero-padded sequential names (001.jpg, 002.jpg, ...).
+    width = max(3, len(str(len(page_img_urls))))
+    urls = {}
+    for idx, (img_url, ext) in enumerate(page_img_urls, start=1):
+        fname = f"{idx:0{width}d}{ext}"
+        urls[fname] = img_url
 
     os.makedirs(path, exist_ok=True)
     utils.download_urls(urls, path, loop, headers=requests.headers, cookies=requests.cookies)
