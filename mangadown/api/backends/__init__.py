@@ -1,7 +1,9 @@
-from . import lirescan
-from . import japscan
-from . import scantradfr
-from . import scan_fr
+# Replacement for the defunct scan-fr scraper.
+# from . import lirescan
+# from . import japscan
+# from . import scantradfr
+# from . import scan_fr
+from . import lelscan
 from .. import kindle
 import logging
 import os
@@ -9,8 +11,8 @@ import shutil
 from collections import defaultdict
 
 
-# backends = (scantradfr, lirescan, scan_fr)  #japscan)
-backends = (scan_fr,)
+# backends = (scantradfr, lirescan, japscan, scan_fr)
+backends = (lelscan,)
 name2mod = {b.__name__: b for b in backends}
 
 
