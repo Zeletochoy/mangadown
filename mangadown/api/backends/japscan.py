@@ -9,13 +9,14 @@ import re
 
 requests = cloudscraper.create_scraper(allow_brotli=False)
 
+
 @utils.json_cached("japscan.json")
 def get_mangas():
     print("Fetching manga list from japscan.com: page ", end="", flush=True)
     mangas = {}
     for page in count(1):
         print(f"{page}, ", end="", flush=True)
-        url = f"http://www.japscan.se/mangas/{page}"
+        url = f"http://www.japscan.lol/mangas/{page}"
         page = requests.get(url)
         soup = BeautifulSoup(page.text, "html.parser")
         main = soup.find(id="main")
@@ -33,7 +34,7 @@ def get_mangas():
                 mangas[title] = url
 
 def get_chapters(url):
-    base_url = "http://www.japscan.se"
+    base_url = "http://www.japscan.lol"
     url = base_url + url
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
@@ -52,7 +53,7 @@ def get_chapters(url):
     return chapters
 
 def download_chapter(url, path, loop):
-    base_url = "http://www.japscan.se"
+    base_url = "http://www.japscan.lol"
     page = requests.get(url)
     soup = BeautifulSoup(page.text, "html.parser")
     nav = soup.find(id="pages")

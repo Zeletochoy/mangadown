@@ -4,6 +4,7 @@
 # from . import scantradfr
 # from . import scan_fr
 from . import lelscan
+from . import lelmanga
 from .. import kindle
 import logging
 import os
@@ -12,7 +13,7 @@ from collections import defaultdict
 
 
 # backends = (scantradfr, lirescan, japscan, scan_fr)
-backends = (lelscan,)
+backends = (lelmanga,)
 name2mod = {b.__name__: b for b in backends}
 
 
@@ -37,9 +38,8 @@ class Backends:
         Backends._mangas = res
         return res.keys()
 
-
     def get_chapters(title, cached=False):
-        if cached  and Backends._chapters[title] is not None:
+        if cached and Backends._chapters[title] is not None:
             return Backends._chapters[title]
         if Backends._mangas is None:
             Backends.get_mangas()

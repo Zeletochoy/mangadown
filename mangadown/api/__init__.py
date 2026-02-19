@@ -10,7 +10,7 @@ from .settings import *
 
 
 loop = asyncio.get_event_loop()
-os.makedirs("output", exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 @lru_cache(1)
