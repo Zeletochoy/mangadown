@@ -19,9 +19,9 @@ def get_mal_title(search):
             cache = json.load(f)
         if search in cache:
             return cache[search]
-    url = "https://api.jikan.moe/v3/search/manga?q=" + search
+    url = "https://api.jikan.moe/v4/manga?q=" + search
     res = requests.get(url)
-    choices = [m["title"] for m in res.json()["results"]]
+    choices = [m["title"] for m in res.json()["data"]]
     if len(choices) == 0:
         return None
     title = ""

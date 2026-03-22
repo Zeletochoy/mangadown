@@ -18,6 +18,7 @@ setup(
         "click>=6.7",
         "cloudscraper>=1.2.48",
         "KindleComicConverter @ git+https://github.com/ciromattia/kcc.git",
+        "packaging>=20.0",
         "Pillow>=7.2.0",
         "psutil>=5.7.2",
         "requests>=2.24.0",

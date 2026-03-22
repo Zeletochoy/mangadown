@@ -9,7 +9,7 @@ from .backends import Backends
 from .settings import *
 
 
-loop = asyncio.get_event_loop()
+loop = asyncio.new_event_loop()
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
