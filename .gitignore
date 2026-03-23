@@ -1,2 +1,15 @@
-mangadown/tracked
-mangadown/api/settings.py
+__pycache__/
+*.egg-info/
+*.pyc
+.env
+dist/
+build/
+.ruff_cache/
+.pytest_cache/
+venv/
+.venv/
+
+# Local data
+tracked
+cache/
+output/
