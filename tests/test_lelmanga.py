@@ -26,7 +26,7 @@ class FakeResponse:
 
 @dataclass
 class FakeSession:
-    """Stand-in for the cloudscraper session (the site is the system boundary)."""
+    """Stand-in for the curl_cffi session (the site is the system boundary)."""
 
     page: str
     headers: dict[str, str] = field(default_factory=dict)
