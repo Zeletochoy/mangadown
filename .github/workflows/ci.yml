@@ -19,9 +19,11 @@ jobs:
         python-version: ["3.12", "3.13"]
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
-      - uses: astral-sh/setup-uv@v10
+      # Pinned exactly: setup-uv publishes v10.0.1 but its major-version
+      # alias tags stop at v7, so `@v10` does not resolve.
+      - uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
 
