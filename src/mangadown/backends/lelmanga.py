@@ -6,6 +6,7 @@ import logging
 import re
 from itertools import count
 from pathlib import Path
+from urllib.parse import urlsplit
 
 import cloudscraper
 from bs4 import BeautifulSoup
@@ -108,9 +109,11 @@ class LelManga:
         page_imgs: list[tuple[str, str]] = []
         for img in reader.find_all("img"):
             img_url = img.get("data-src") or img.get("src", "")
-            if not img_url or "wp-content/uploads" not in img_url:
+            if not isinstance(img_url, str) or "wp-content/uploads" not in img_url:
                 continue
-            fname = img_url.rsplit("/", 1)[-1]
+            # URLs are served through the CDN with a cache-busting query string
+            # (".../001.webp?lmv=123"), so match the extension on the path only.
+            fname = urlsplit(img_url).path.rsplit("/", 1)[-1]
             m = re.search(r"\.(webp|jpg|jpeg|png)$", fname, re.IGNORECASE)
             if not m:
                 continue
