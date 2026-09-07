@@ -105,8 +105,15 @@ dragon ball super
 ## Development
 
 ```bash
-uv pip install -e ".[dev]"
+uv sync --extra dev
 uv run pytest
 uv run ruff check src/ tests/
 uv run ruff format src/ tests/
 ```
+
+CI runs the same lint, format and test steps on Python 3.12 and 3.13 for every
+pull request, so keep these green before pushing. Note that `ruff format` is
+enforced (`--check`), not just available.
+
+`uv run ty check src/ tests/` is not run by CI: it currently reports six
+pre-existing diagnostics. Worth clearing so it can be added.
