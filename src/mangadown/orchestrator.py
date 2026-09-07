@@ -34,7 +34,12 @@ def _build_manga_index(
         cache = Cache(cache_dir, backend.name)
         if not use_cache:
             cache.clear()
-        mangas = backend.get_mangas(cache)
+        try:
+            mangas = backend.get_mangas(cache)
+        except Exception as exc:
+            # One unreachable source must not take the other backends with it.
+            log.warning("%s.get_mangas failed: %s", backend.name, exc, exc_info=_debug())
+            continue
         for title, url in mangas.items():
             index[title].append((backend, url))
     return index
