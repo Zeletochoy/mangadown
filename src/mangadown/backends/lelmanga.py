@@ -8,7 +8,7 @@ from itertools import count
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from curl_cffi import Session
 
 from mangadown.cache import Cache
@@ -25,6 +25,20 @@ _USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
+
+
+def _attr(tag: Tag, name: str) -> str:
+    """Return a tag attribute as a single string.
+
+    BeautifulSoup types attributes as ``str | list[str]`` because HTML allows
+    multi-valued ones, and neither ``.strip()`` nor ``float()`` accepts a list.
+    """
+    value = tag.get(name)
+    if isinstance(value, str):
+        return value
+    if isinstance(value, list) and value:
+        return str(value[0])
+    return ""
 
 
 class LelManga:
@@ -62,7 +76,7 @@ class LelManga:
 
             soup = BeautifulSoup(resp.text, "html.parser")
             for a in soup.find_all("a", href=True):
-                href = a["href"].strip().rstrip("/")
+                href = _attr(a, "href").strip().rstrip("/")
                 m = re.match(rf"^(?:{re.escape(_BASE_URL)})?/manga/([a-z0-9][\w-]*)$", href)
                 if not m:
                     continue
@@ -94,13 +108,13 @@ class LelManga:
 
         for li in chapter_list.find_all("li", attrs={"data-num": True}):
             try:
-                num = float(li["data-num"])
+                num = float(_attr(li, "data-num"))
             except (ValueError, KeyError):
                 continue
             a = li.find("a", href=True)
             if not a:
                 continue
-            chapters[num] = a["href"].strip()
+            chapters[num] = _attr(a, "href").strip()
 
         return chapters
 
