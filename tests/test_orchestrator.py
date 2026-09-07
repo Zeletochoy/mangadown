@@ -225,9 +225,7 @@ def test_falls_back_to_second_backend_on_download_failure(
 
 
 @patch("mangadown.orchestrator.dir_to_epub")
-def test_primary_backend_wins_when_it_succeeds(
-    mock_epub: MagicMock, settings: Settings
-) -> None:
+def test_primary_backend_wins_when_it_succeeds(mock_epub: MagicMock, settings: Settings) -> None:
     """The fallback must not be consulted while the primary works."""
     primary = FakeBackend(
         mangas={"one piece": "/manga/one-piece"}, chapters={1.0: "/lel/1"}, name="primary"

@@ -123,9 +123,7 @@ class MangaMoins:
         # Source pages are two-digit; destination names are padded to match the
         # width the converter expects for reading order.
         width = max(3, len(str(count)))
-        urls = {
-            f"{idx:0{width}d}.webp": f"{base}{idx:02d}.webp" for idx in range(1, count + 1)
-        }
+        urls = {f"{idx:0{width}d}.webp": f"{base}{idx:02d}.webp" for idx in range(1, count + 1)}
 
         await download_images(
             urls,
