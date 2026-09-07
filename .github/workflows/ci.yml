@@ -36,5 +36,8 @@ jobs:
       - name: Format
         run: uv run ruff format --check src tests
 
+      - name: Types
+        run: uv run ty check src tests
+
       - name: Test
         run: uv run pytest
