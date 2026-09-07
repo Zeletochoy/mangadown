@@ -17,6 +17,11 @@ from mangadown.mal import get_reading_list, resolve_mal_title
 log = logging.getLogger(__name__)
 
 
+def _debug() -> bool:
+    """Whether to attach tracebacks; these failures are expected and per-chapter."""
+    return log.isEnabledFor(logging.DEBUG)
+
+
 def _build_manga_index(
     backends: list[Backend],
     cache_dir: Path,
@@ -82,8 +87,14 @@ def run_updates(
         for backend, manga_url in index[manga_title]:
             try:
                 backend_chapters = backend.get_chapters(manga_url)
-            except Exception:
-                log.warning("%s.get_chapters(%s) failed", backend.name, manga_title, exc_info=True)
+            except Exception as exc:
+                log.warning(
+                    "%s.get_chapters(%s) failed: %s",
+                    backend.name,
+                    manga_title,
+                    exc,
+                    exc_info=_debug(),
+                )
                 continue
             for num, url in backend_chapters.items():
                 chapters[num].append((backend, url))
@@ -126,13 +137,14 @@ def run_updates(
                     asyncio.run(backend.download_chapter(chapter_url, tmp_dir))
                     downloaded = True
                     break
-                except Exception:
+                except Exception as exc:
                     log.warning(
-                        "  %s.download_chapter(%s, %s) failed",
+                        "  %s.download_chapter(%s, %s) failed: %s",
                         backend.name,
                         manga_title,
                         chap_label,
-                        exc_info=True,
+                        exc,
+                        exc_info=_debug(),
                     )
                     if tmp_dir.is_dir():
                         shutil.rmtree(tmp_dir)
@@ -148,8 +160,10 @@ def run_updates(
                 result.rename(tmp_epub)
                 tmp_epub.rename(epub_path)
                 log.info("  Chapter %s done", chap_label)
-            except Exception:
-                log.warning("  Conversion failed for chapter %s", chap_label, exc_info=True)
+            except Exception as exc:
+                log.warning(
+                    "  Conversion failed for chapter %s: %s", chap_label, exc, exc_info=_debug()
+                )
                 if tmp_epub.exists():
                     tmp_epub.unlink()
             finally:

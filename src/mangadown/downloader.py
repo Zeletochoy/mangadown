@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 
 import httpx
-from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
 log = logging.getLogger(__name__)
 
@@ -15,8 +15,18 @@ _MAX_CONCURRENT = 8
 _TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 
+def _is_retryable(exc: BaseException) -> bool:
+    """Retry transport errors and transient server responses, but not 4xx."""
+    if isinstance(exc, httpx.TransportError):
+        return True
+    if isinstance(exc, httpx.HTTPStatusError):
+        status = exc.response.status_code
+        return status == 429 or status >= 500
+    return False
+
+
 @retry(
-    retry=retry_if_exception_type((httpx.HTTPStatusError, httpx.TransportError)),
+    retry=retry_if_exception(_is_retryable),
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=1, max=10),
     reraise=True,

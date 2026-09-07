@@ -54,7 +54,14 @@ mangadown download --list-mal
 
 # Force refresh (ignore cache)
 mangadown download --no-cache
+
+# Verbose: per-request HTTP logs and full tracebacks on failures
+mangadown download -v
 ```
+
+A chapter whose pages are missing from the source site is reported as a single
+warning and skipped; it is not marked as downloaded, so a later run picks it up
+once the source is fixed.
 
 ### Send EPUBs to Kindle
 
