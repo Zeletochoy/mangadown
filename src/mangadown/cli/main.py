@@ -18,6 +18,10 @@ def _setup_logging(verbose: bool) -> None:
         format="%(message)s",
         stream=sys.stderr,
     )
+    if not verbose:
+        # httpx/urllib3 log every single request at INFO level.
+        for noisy in ("httpx", "httpcore", "urllib3"):
+            logging.getLogger(noisy).setLevel(logging.WARNING)
 
 
 def _user_choice(prompt: str, candidates: list[str]) -> str:

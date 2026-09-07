@@ -20,15 +20,17 @@ class FakeBackend:
         chapters: dict[float, str] | None = None,
         *,
         fail_download: bool = False,
+        name: str = "fake",
     ) -> None:
         self._mangas = mangas or {}
         self._chapters = chapters or {}
         self._fail_download = fail_download
+        self._name = name
         self.downloaded: list[tuple[str, Path]] = []
 
     @property
     def name(self) -> str:
-        return "fake"
+        return self._name
 
     def get_mangas(self, cache):
         return self._mangas
@@ -156,3 +158,86 @@ def test_unknown_manga_logged(settings: Settings, caplog: pytest.LogCaptureFixtu
     with caplog.at_level("WARNING"):
         run_updates(["nonexistent"], [backend], settings)
     assert "not found" in caplog.text.lower()
+
+
+def _epub_writer(image_dir: Path, output_dir: Path, title: str | None = None) -> Path:
+    epub = output_dir / f"{image_dir.name}.epub"
+    epub.write_bytes(b"fake epub")
+    return epub
+
+
+@patch("mangadown.orchestrator.dir_to_epub")
+def test_failing_get_mangas_doesnt_abort_other_backends(
+    mock_epub: MagicMock, settings: Settings, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An unreachable source must not take the working ones down with it."""
+
+    class BrokenCatalogue(FakeBackend):
+        def get_mangas(self, cache):
+            raise RuntimeError("api returned 403")
+
+    broken = BrokenCatalogue(name="broken")
+    working = FakeBackend(
+        mangas={"test manga": "/manga/test"}, chapters={1.0: "/ch/1"}, name="working"
+    )
+    mock_epub.side_effect = _epub_writer
+
+    with caplog.at_level("WARNING"):
+        run_updates(["test manga"], [broken, working], settings)
+
+    assert "403" in caplog.text
+    assert (settings.output_dir / "test manga 1.epub").exists()
+    assert len(working.downloaded) == 1
+
+
+def test_failing_get_mangas_doesnt_abort_listing(settings: Settings) -> None:
+    class BrokenCatalogue(FakeBackend):
+        def get_mangas(self, cache):
+            raise RuntimeError("api returned 403")
+
+    working = FakeBackend(mangas={"one piece": "/manga/one-piece"}, name="working")
+    assert list_mangas([BrokenCatalogue(name="broken"), working], settings) == ["one piece"]
+
+
+@patch("mangadown.orchestrator.dir_to_epub")
+def test_falls_back_to_second_backend_on_download_failure(
+    mock_epub: MagicMock, settings: Settings
+) -> None:
+    """The point of a second source: chapters the first cannot serve."""
+    primary = FakeBackend(
+        mangas={"one piece": "/manga/one-piece"},
+        chapters={1181.0: "/lel/1181"},
+        fail_download=True,
+        name="primary",
+    )
+    fallback = FakeBackend(
+        mangas={"one piece": "/manga/one-piece"},
+        chapters={1181.0: "/alt/1181"},
+        name="fallback",
+    )
+    mock_epub.side_effect = _epub_writer
+
+    run_updates(["one piece"], [primary, fallback], settings)
+
+    assert primary.downloaded == []
+    assert fallback.downloaded == [("/alt/1181", settings.output_dir / "one piece 1181")]
+    assert (settings.output_dir / "one piece 1181.epub").exists()
+
+
+@patch("mangadown.orchestrator.dir_to_epub")
+def test_primary_backend_wins_when_it_succeeds(
+    mock_epub: MagicMock, settings: Settings
+) -> None:
+    """The fallback must not be consulted while the primary works."""
+    primary = FakeBackend(
+        mangas={"one piece": "/manga/one-piece"}, chapters={1.0: "/lel/1"}, name="primary"
+    )
+    fallback = FakeBackend(
+        mangas={"one piece": "/manga/one-piece"}, chapters={1.0: "/alt/1"}, name="fallback"
+    )
+    mock_epub.side_effect = _epub_writer
+
+    run_updates(["one piece"], [primary, fallback], settings)
+
+    assert len(primary.downloaded) == 1
+    assert fallback.downloaded == []

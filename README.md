@@ -54,7 +54,32 @@ mangadown download --list-mal
 
 # Force refresh (ignore cache)
 mangadown download --no-cache
+
+# Verbose: per-request HTTP logs and full tracebacks on failures
+mangadown download -v
 ```
+
+## Sources
+
+Chapters are fetched from the backends in `mangadown.backends.get_backends()`,
+in order:
+
+| Backend | Notes |
+|---|---|
+| `lelmanga` | Primary. Plain HTML pages. |
+| `mangamoins` | Fallback. JSON API; smaller catalogue. |
+
+Each chapter is tried against every backend that carries the manga until one
+succeeds, so a chapter missing from the primary source is picked up from the
+fallback. Backends key manga by a normalised title (`one-piece` and `one_piece`
+both become `one piece`), which is what lets them substitute for one another —
+a new backend must normalise the same way.
+
+If every backend fails for a chapter, it is reported as a single warning and
+skipped. It is not marked as downloaded, so a later run retries it.
+
+An unreachable source degrades rather than aborting: if a backend's catalogue
+cannot be fetched, it is logged and the remaining backends still run.
 
 ### Send EPUBs to Kindle
 

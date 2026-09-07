@@ -6,9 +6,10 @@ import logging
 import re
 from itertools import count
 from pathlib import Path
+from urllib.parse import urlsplit
 
-import cloudscraper
 from bs4 import BeautifulSoup
+from curl_cffi import Session
 
 from mangadown.cache import Cache
 from mangadown.downloader import download_images
@@ -16,13 +17,21 @@ from mangadown.downloader import download_images
 log = logging.getLogger(__name__)
 
 _BASE_URL = "https://www.lelmanga.com"
+_TIMEOUT = 30
+
+# curl_cffi impersonates a browser at the TLS layer rather than through a headers
+# dict, so Session.headers is empty and the image downloader needs its own UA.
+_USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+)
 
 
 class LelManga:
     """Scraper for lelmanga.com."""
 
     def __init__(self) -> None:
-        self._session = cloudscraper.create_scraper(allow_brotli=False)
+        self._session = Session(impersonate="chrome", timeout=_TIMEOUT)
 
     @property
     def name(self) -> str:
@@ -108,9 +117,11 @@ class LelManga:
         page_imgs: list[tuple[str, str]] = []
         for img in reader.find_all("img"):
             img_url = img.get("data-src") or img.get("src", "")
-            if not img_url or "wp-content/uploads" not in img_url:
+            if not isinstance(img_url, str) or "wp-content/uploads" not in img_url:
                 continue
-            fname = img_url.rsplit("/", 1)[-1]
+            # URLs are served through the CDN with a cache-busting query string
+            # (".../001.webp?lmv=123"), so match the extension on the path only.
+            fname = urlsplit(img_url).path.rsplit("/", 1)[-1]
             m = re.search(r"\.(webp|jpg|jpeg|png)$", fname, re.IGNORECASE)
             if not m:
                 continue
@@ -129,8 +140,8 @@ class LelManga:
         await download_images(
             urls,
             dest,
-            headers=dict(self._session.headers),
-            cookies={c.name: c.value for c in self._session.cookies},
+            headers={"User-Agent": _USER_AGENT},
+            cookies=dict(self._session.cookies),
         )
 
     # ------------------------------------------------------------------

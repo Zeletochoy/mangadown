@@ -29,7 +29,12 @@ class Backend(Protocol):
 
 
 def get_backends() -> list[Backend]:
-    """Return all registered backend instances."""
-    from mangadown.backends.lelmanga import LelManga
+    """Return all registered backend instances, most preferred first.
 
-    return [LelManga()]
+    The orchestrator tries them in order per chapter, so earlier backends act
+    as the primary source and later ones as fallbacks.
+    """
+    from mangadown.backends.lelmanga import LelManga
+    from mangadown.backends.mangamoins import MangaMoins
+
+    return [LelManga(), MangaMoins()]
