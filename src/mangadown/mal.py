@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 
 import httpx
 
@@ -64,7 +65,7 @@ def resolve_mal_title(
     search: str,
     cache: Cache,
     *,
-    chooser: callable | None = None,
+    chooser: Callable[[list[str]], str] | None = None,
 ) -> str | None:
     """Resolve a manga search string to its canonical MAL title.
 

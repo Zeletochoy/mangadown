@@ -105,8 +105,13 @@ dragon ball super
 ## Development
 
 ```bash
-uv pip install -e ".[dev]"
+uv sync --extra dev
 uv run pytest
 uv run ruff check src/ tests/
 uv run ruff format src/ tests/
+uv run ty check src/ tests/
 ```
+
+CI runs all four on Python 3.12 and 3.13 for every pull request, so keep them
+green before pushing. Note that `ruff format` is enforced (`--check`), not just
+available.

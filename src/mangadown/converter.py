@@ -20,7 +20,9 @@ def dir_to_epub(image_dir: Path, output_dir: Path, title: str | None = None) -> 
     from kindlecomicconverter import comic2ebook
 
     # KCC chokes on truncated images (common with web downloads).
-    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    # Pillow's stub types this flag as Literal[False], so a write looks invalid
+    # to the checker even though the flag exists to be set.
+    ImageFile.LOAD_TRUNCATED_IMAGES = True  # ty: ignore[invalid-assignment]
 
     argv = [str(image_dir), "-p", "KV", "-m", "-f", "EPUB", "-u", "-o", str(output_dir)]
     if title is not None:

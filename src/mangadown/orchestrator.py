@@ -6,6 +6,7 @@ import asyncio
 import logging
 import shutil
 from collections import defaultdict
+from collections.abc import Callable
 from pathlib import Path
 
 from mangadown.backends import Backend
@@ -59,7 +60,7 @@ def run_updates(
     settings: Settings,
     *,
     use_cache: bool = True,
-    chooser: callable | None = None,
+    chooser: Callable[[list[str]], str] | None = None,
 ) -> None:
     """Download new chapters for each manga in *mangas*.
 

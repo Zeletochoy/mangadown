@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # pyproject requires >=3.12, so test the floor as well as current.
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      # Pinned exactly: setup-uv publishes v10.0.1 but its major-version
+      # alias tags stop at v7, so `@v10` does not resolve.
+      - uses: astral-sh/setup-uv@v10.0.1
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --extra dev --python ${{ matrix.python-version }}
+
+      - name: Lint
+        run: uv run ruff check src tests
+
+      - name: Format
+        run: uv run ruff format --check src tests
+
+      - name: Types
+        run: uv run ty check src tests
+
+      - name: Test
+        run: uv run pytest
